@@ -4,3 +4,6 @@
 .Ruserdata
 data
 seq
+out
+genomes.txt
+families.txt
