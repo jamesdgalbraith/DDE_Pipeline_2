@@ -4,7 +4,7 @@ library(tidyverse)
 
 # read in blast output
 tblastn_in <- read_tsv(paste0("out/tblastn/compiled_in_", "Glomeris_maerens", ".out"),
-                       col_names = c("qseqid", "seqnames", "pident", "length", "qstart", "qend", "qlen", "sstart", "send", "slen", "evalue"))
+                       col_names = c("qseqid", "seqnames", "pident", "length", "qstart", "qend", "qlen", "sstart", "send", "slen", "evalue", "frames"))
 
 # read in genome
 genome_seq <- readDNAStringSet(paste0("seq/", "Glomeris_maerens", ".fasta"))
