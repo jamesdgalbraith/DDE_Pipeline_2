@@ -27,12 +27,12 @@ writeXStringSet(tblastn_seq, paste0("out/plain_tblastn_initial_fastas/", "Glomer
 writeXStringSet(x = translate(tblastn_seq, if.fuzzy.codon = "solve"),
                 filepath = paste0("out/plain_tblastn_initial_fastas/", "Glomeris_maerens", "_seq_aa.fasta"))
 
-recip_blast <- read_tsv(
-  system(
-    paste0("blastp -query out/plain_tblastn_initial_fastas/", "Glomeris_maerens",
-           "_seq_aa.fasta -db data/representative/compiled_database/compiled.fasta -outfmt \"6 qseqid sseqid pident length qstart qend qlen sstart send slen evalue\""),
-    intern = T),
+system(paste0("blastp -num_threads 8 -query out/plain_tblastn_initial_fastas/", "Glomeris_maerens",
+         "_seq_aa.fasta -db data/representative/compiled_database/compiled.fasta -outfmt \"6 qseqid sseqid pident length qstart qend qlen sstart send slen evalue\" -out out/recip/", "Glomeris_maerens", ".out"))
+
+recip_blastp <- read_tsv(paste0("out/recip", "Glomeris_maerens", ".out"),
   col_names = c("qseqid", "seqnames", "pident", "length", "qstart", "qend", "qlen", "sstart", "send", "slen", "evalue")
   )
 
-recip_blast
+recip_blastp %>%
+  dplyr::group_by(qseqid)
