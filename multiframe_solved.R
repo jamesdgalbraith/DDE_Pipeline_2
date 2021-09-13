@@ -4,7 +4,7 @@ library(tidyverse)
 
 genomes <- read_tsv("genomes.txt", col_names = "species_name")
 
-for(j in 1:nrow(genomes)){
+for(j in 2:nrow(genomes)){
   
   # set species name
   species_name <- genomes$species_name[j]
@@ -94,8 +94,8 @@ for(j in 1:nrow(genomes)){
   writeXStringSet(translated_single_frames, paste0("out/psitblastn_initial_fastas/", species_name, ".fasta"))
   
   # Search against RPS and read in
+  print("rpsblast")
   system(paste0("rpsblast -query out/psitblastn_initial_fastas/", species_name, ".fasta -db data/representative/psiblast_db/psiblast_db -outfmt \"6 qseqid sseqid pident length qstart qend qlen sstart send slen evalue frames \" -out out/recip_psiblast/", species_name, ".out"))
-  
   rpsblast_in <- read_tsv(paste0("out/recip_psiblast/", species_name, ".out"),
            col_names = c("seqnames", "sseqid", "pident", "length", "qstart", "qend", "qlen", "sstart", "send", "slen", "evalue", "frames"))
   
@@ -107,7 +107,7 @@ for(j in 1:nrow(genomes)){
     mutate(class = sub("_.*", "", sseqid)) %>%
     dplyr::select(seqnames, class)
   
-  classes_found <- base::unique(classed_ranges$class)
+  classes_found <- base::unique(rpsblast_filtered$class)
   
   for (i in 1:length(classes_found)) {
     
@@ -120,8 +120,8 @@ for(j in 1:nrow(genomes)){
     writeXStringSet(x = translated_class,
                     filepath = paste0("out/psiblast_classed/", classes_found[i], "_in_", species_name, ".fasta"))
     
-    system(paste0("mafft --thread 4 out/psiblast_classed/", classes_found[i], "_in_", species_name,
-                  ".fasta > out/psiblast_classed_aln/", classes_found[i], "_in_", species_name, ".fasta"))
+    # system(paste0("mafft --thread 4 out/psiblast_classed/", classes_found[i], "_in_", species_name,
+    #               ".fasta > out/psiblast_classed_aln/", classes_found[i], "_in_", species_name, ".fasta"))
     
   }
   
