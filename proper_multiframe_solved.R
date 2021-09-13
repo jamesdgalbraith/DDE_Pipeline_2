@@ -1,14 +1,36 @@
-library(BSgenome)
-library(plyranges)
-library(tidyverse)
+#!/usr/bin/env Rscript
 
-# read in genome names
-genomes <- read_tsv("genomes.txt", col_names = "species_name")
+suppressPackageStartupMessages({
+  library(optparse)
+  library(BSgenome)
+  library(plyranges)
+  library(tidyverse)
+})
 
-species_name <- genomes$species_name[1]
+
+# parse input variables
+option_list = list(
+  make_option(c("-s", "--species_name"), type="character", default=NULL, 
+              help="species name", metavar="character"),
+  make_option(c("-o", "--out"), type="character", default="out/plain_tblastn_initial_fastas/", 
+              help="path to output [default= %default]", metavar="character")
+  
+)
+
+opt_parser = OptionParser(option_list=option_list)
+opt = parse_args(opt_parser)
+
+if (is.na(opt$species_name)) {
+  stop("Species name is needed")
+} else {
+  print(opt$species_name)
+}
+
+# set species names
+species_name <- opt$species_name
 
 # read in blast output
-tblastn_in <- read_tsv(paste0("out/tblastn/compiled_in_", species_name, ".out"),
+tblastn_in <- read_tsv(paste0("out/tblastn/compiled_in_", species_name, ".out"), show_col_types = F,
                        col_names = c("qseqid", "seqnames", "pident", "length", "qstart", "qend", "qlen", "sstart", "send", "slen", "evalue", "frames"))
 
 # read in genome
@@ -54,7 +76,7 @@ single_frames_fwd <- tibble(joined = names(table(tblastn_fwd_combined$joined)), 
 
 # Get sequence of single frames
 single_frames_fwd_seq <- getSeq(genome_seq, single_frames_fwd)
-single_frames_fwd_seq <- translate(single_frames_fwd_seq, if.fuzzy.codon = "solve")
+single_frames_fwd_seq <- translate(single_frames_fwd_seq, if.fuzzy.codon = "X")
 names(single_frames_fwd_seq) <-paste0(seqnames(single_frames_fwd), ":", ranges(single_frames_fwd), "(", strand(single_frames_fwd), ")")
 
 # Two frames
@@ -134,7 +156,7 @@ single_frames_rev <- tibble(joined = names(table(tblastn_rev_combined$joined)), 
 
 # Get sequence of single frames
 single_frames_rev_seq <- getSeq(genome_seq, single_frames_rev)
-single_frames_rev_seq <- translate(single_frames_rev_seq, if.fuzzy.codon = "solve")
+single_frames_rev_seq <- translate(single_frames_rev_seq, if.fuzzy.codon = "X")
 names(single_frames_rev_seq) <-paste0(seqnames(single_frames_rev), ":", ranges(single_frames_rev), "(", strand(single_frames_rev), ")")
 
 # Two frames
@@ -185,4 +207,8 @@ for(j in 1:length(multiple_frames_rev)){
 rev_seq <- c(single_frames_rev_seq, multiple_frames_rev_seq)
 
 # ALL
+# Compile together
 both_seq <- c(fwd_seq, rev_seq)
+
+# Write to file
+writeXStringSet(both_seq, filepath = paste0(opt$out, "", species_name, "_seq.fasta"))
