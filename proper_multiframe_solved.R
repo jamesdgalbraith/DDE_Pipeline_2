@@ -24,7 +24,7 @@ tblastn_fixed <- tblastn_in %>%
                 end = ifelse(strand == "+", send, sstart),
                 qframe = as.integer(qframe), sframe = as.integer(sframe))
 
-# FORWARD SINGLE FRAME  
+# FORWARD
 # Split into separate into each frame
 tblastn_fwd <- tblastn_fixed %>%
   dplyr::filter(strand == "+") %>%
@@ -51,6 +51,11 @@ single_frames_fwd <- tibble(joined = names(table(tblastn_fwd_combined$joined)), 
   tidyr::separate(ranges, into = c("start", "end"), sep = "-") %>%
   dplyr::mutate(start = as.integer(start), end = as.integer(end)) %>%
   plyranges::as_granges()
+
+# Get sequence of single frames
+single_frames_fwd_seq <- getSeq(genome_seq, single_frames_fwd)
+single_frames_fwd_seq <- translate(single_frames_fwd_seq, if.fuzzy.codon = "solve")
+names(single_frames_fwd_seq) <-paste0(seqnames(single_frames_fwd), ":", ranges(single_frames_fwd), "(", strand(single_frames_fwd), ")")
 
 # Two frames
 multiple_frames_fwd <- tibble(joined = names(table(tblastn_fwd_combined$joined)), n = as.integer(table(tblastn_fwd_combined$joined))) %>%
@@ -92,8 +97,92 @@ for(j in 1:length(multiple_frames_fwd)){
   }
   
   
-  if(j==1){shipped_seq <- ship_seq}else{shipped_seq <- c(shipped_seq, ship_seq)}
+  if(j==1){multiple_frames_fwd_seq <- ship_seq}else{multiple_frames_fwd_seq <- c(multiple_frames_fwd_seq, ship_seq)}
   
 }
-width(shipped_seq)
 
+# Compile forward sequences
+fwd_seq <- c(single_frames_fwd_seq, multiple_frames_fwd_seq)
+
+# REVERSE
+# Split into separate into each frame
+tblastn_rev <- tblastn_fixed %>%
+  dplyr::filter(strand == "-") %>%
+  plyranges::as_granges()
+
+# Seperate into individual frames
+tblastn_rev_1 <- GenomicRanges::reduce(tblastn_rev[tblastn_rev$sframe == -1]) %>% dplyr::mutate(sframe = -1)
+tblastn_rev_2 <- GenomicRanges::reduce(tblastn_rev[tblastn_rev$sframe == -2]) %>% dplyr::mutate(sframe = -2)
+tblastn_rev_3 <- GenomicRanges::reduce(tblastn_rev[tblastn_rev$sframe == -3]) %>% dplyr::mutate(sframe = -3)
+
+# Reduce/merge (will contain different frames)
+tblastn_rev_reduced <- GenomicRanges::reduce(tblastn_rev)
+
+# Overlap frames and name columns
+tblastn_rev_combined <- rbind(plyranges::pair_overlaps(tblastn_rev_reduced, tblastn_rev_1),
+                              plyranges::pair_overlaps(tblastn_rev_reduced, tblastn_rev_2)) %>%
+  rbind(plyranges::pair_overlaps(tblastn_rev_reduced, tblastn_rev_3))
+colnames(tblastn_rev_combined) <- c("joined", "framed", "frame")
+
+# Determine those in single frames and make ranges
+single_frames_rev <- tibble(joined = names(table(tblastn_rev_combined$joined)), n = as.integer(table(tblastn_rev_combined$joined))) %>%
+  filter(n==1) %>%
+  tidyr::separate(joined, into = c("seqnames", "ranges", "strand"), sep = ":") %>%
+  tidyr::separate(ranges, into = c("start", "end"), sep = "-") %>%
+  dplyr::mutate(start = as.integer(start), end = as.integer(end)) %>%
+  plyranges::as_granges()
+
+# Get sequence of single frames
+single_frames_rev_seq <- getSeq(genome_seq, single_frames_rev)
+single_frames_rev_seq <- translate(single_frames_rev_seq, if.fuzzy.codon = "solve")
+names(single_frames_rev_seq) <-paste0(seqnames(single_frames_rev), ":", ranges(single_frames_rev), "(", strand(single_frames_rev), ")")
+
+# Two frames
+multiple_frames_rev <- tibble(joined = names(table(tblastn_rev_combined$joined)), n = as.integer(table(tblastn_rev_combined$joined))) %>%
+  filter(n==2) %>%
+  tidyr::separate(joined, into = c("seqnames", "ranges", "strand"), sep = ":") %>%
+  tidyr::separate(ranges, into = c("start", "end"), sep = "-") %>%
+  dplyr::mutate(start = as.integer(start), end = as.integer(end)) %>%
+  plyranges::as_granges()
+
+# extract seperate frames
+tblastn_rev_framed <- tblastn_rev_combined$framed %>% mutate(frame  = tblastn_rev_combined$frame) %>%
+  sort()
+
+# loop over, extract frames
+for(j in 1:length(multiple_frames_rev)){
+  print(paste0(j, " of ", length(multiple_frames_rev)))
+  
+  # first remove those wholly contained within others
+  if(width(multiple_frames_rev[j]) == width(join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[1]) ||
+     width(multiple_frames_rev[j]) == width(join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[2])){
+    ship_seq <- translate(getSeq(genome_seq, multiple_frames_rev[j]))
+    names(ship_seq) <- paste0(seqnames(multiple_frames_rev[j]), ":", ranges(multiple_frames_rev[j]), "(", strand(multiple_frames_rev[j]), ")")
+    
+  } else{
+    
+    # identify rear portion
+    stern <- join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[1]
+    
+    #identify front portion and trim off (subtract) rear portion
+    bow <- setdiff_ranges_directed(join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[2],
+                                   join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[1])
+    
+    # get sequences, translate and append
+    bow_seq <- translate(getSeq(genome_seq, bow))
+    stern_seq <- translate(getSeq(genome_seq, stern))
+    ship_seq <- AAStringSet(paste0(as.character(bow_seq), as.character(stern_seq)))
+    names(ship_seq) <- paste0(seqnames(multiple_frames_rev[j]), ":", ranges(multiple_frames_rev[j]), "(", strand(multiple_frames_rev[j]), ")")
+    
+  }
+  
+  
+  if(j==1){multiple_frames_rev_seq <- ship_seq}else{multiple_frames_rev_seq <- c(multiple_frames_rev_seq, ship_seq)}
+  
+}
+
+# Compile reverse sequences
+rev_seq <- c(single_frames_rev_seq, multiple_frames_rev_seq)
+
+# ALL
+both_seq <- c(fwd_seq, rev_seq)
