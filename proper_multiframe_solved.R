@@ -33,15 +33,9 @@ suppressPackageStartupMessages({
 species_name <- opt$species_name
 
 # read in blast output
-tblastn_in <- read_tsv(paste0("out/tblastn/compiled_in_", species_name, ".out"), show_col_types = F,
-                       col_names = c("qseqid", "seqnames", "pident", "length", "qstart", "qend", "qlen", "sstart", "send", "slen", "evalue", "frames"))
-
-# read in genome
-genome_seq <- readDNAStringSet(paste0("seq/", species_name, ".fasta"))
-names(genome_seq) <- gsub(" .*", "", names(genome_seq))
-
-# filter blast output
-tblastn_fixed <- tblastn_in %>%
+tblastn_fixed <- read_tsv(paste0("out/tblastn/compiled_in_", species_name, ".out"), show_col_types = F,
+                       col_names = c("qseqid", "seqnames", "pident", "length", "qstart", "qend", "qlen",
+                                     "sstart", "send", "slen", "evalue", "frames")) %>%
   dplyr::filter(length >= 0.5*qlen, length <= 1.2*qlen) %>%
   tidyr::separate(frames, into = c("qframe", "sframe"), sep = "/") %>%
   dplyr::mutate(strand = ifelse(sstart < send, "+", "-"),
@@ -49,12 +43,22 @@ tblastn_fixed <- tblastn_in %>%
                 end = ifelse(strand == "+", send, sstart),
                 qframe = as.integer(qframe), sframe = as.integer(sframe))
 
-# FORWARD
+# read in genome
+genome_seq <- readDNAStringSet(paste0("seq/", species_name, ".fasta"))
+names(genome_seq) <- gsub(" .*", "", names(genome_seq))
+
 # Split into separate into each frame
 tblastn_fwd <- tblastn_fixed %>%
   dplyr::filter(strand == "+") %>%
   plyranges::as_granges()
+tblastn_rev <- tblastn_fixed %>%
+  dplyr::filter(strand == "-") %>%
+  plyranges::as_granges()
 
+tblastn_fixed <- NULL
+gc()
+
+# FORWARD
 # Seperate into individual frames
 tblastn_fwd_1 <- GenomicRanges::reduce(tblastn_fwd[tblastn_fwd$sframe == 1]) %>% dplyr::mutate(sframe = 1)
 tblastn_fwd_2 <- GenomicRanges::reduce(tblastn_fwd[tblastn_fwd$sframe == 2]) %>% dplyr::mutate(sframe = 2)
@@ -115,7 +119,7 @@ for(j in 1:length(multiple_frames_fwd)){
                                      join_overlap_intersect_directed(tblastn_fwd_framed, multiple_frames_fwd[j])[2])
     
     # get sequences, translate and append
-    bow_seq <- suppressWarnings(translate(getSeq(genome_seq, bow)), if.fuzzy.codon = "X")
+    bow_seq <- suppressWarnings(translate(getSeq(genome_seq, bow), if.fuzzy.codon = "X"))
     stern_seq <- translate(getSeq(genome_seq, stern), if.fuzzy.codon = "X")
     ship_seq <- AAStringSet(paste0(as.character(bow_seq), as.character(stern_seq)))
     names(ship_seq) <- paste0(seqnames(multiple_frames_fwd[j]), ":", ranges(multiple_frames_fwd[j]), "(", strand(multiple_frames_fwd[j]), ")")
@@ -127,15 +131,7 @@ for(j in 1:length(multiple_frames_fwd)){
   
 }
 
-# Compile forward sequences
-fwd_seq <- c(single_frames_fwd_seq, multiple_frames_fwd_seq)
-
 # REVERSE
-# Split into separate into each frame
-tblastn_rev <- tblastn_fixed %>%
-  dplyr::filter(strand == "-") %>%
-  plyranges::as_granges()
-
 # Seperate into individual frames
 tblastn_rev_1 <- GenomicRanges::reduce(tblastn_rev[tblastn_rev$sframe == -1]) %>% dplyr::mutate(sframe = -1)
 tblastn_rev_2 <- GenomicRanges::reduce(tblastn_rev[tblastn_rev$sframe == -2]) %>% dplyr::mutate(sframe = -2)
@@ -207,12 +203,9 @@ for(j in 1:length(multiple_frames_rev)){
   
 }
 
-# Compile reverse sequences
-rev_seq <- c(single_frames_rev_seq, multiple_frames_rev_seq)
-
 # ALL
 # Compile together
-both_seq <- c(fwd_seq, rev_seq)
+both_seq <- c(single_frames_fwd_seq, multiple_frames_fwd_seq, single_frames_rev_seq, multiple_frames_rev_seq)
 
 # Write to file
 writeXStringSet(both_seq, filepath = paste0(opt$out, "", species_name, "_seq.fasta"))
