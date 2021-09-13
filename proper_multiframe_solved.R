@@ -102,7 +102,7 @@ for(j in 1:length(multiple_frames_fwd)){
   # first remove those wholly contained within others
   if(width(multiple_frames_fwd[j]) == width(join_overlap_intersect_directed(tblastn_fwd_framed, multiple_frames_fwd[j])[1]) ||
      width(multiple_frames_fwd[j]) == width(join_overlap_intersect_directed(tblastn_fwd_framed, multiple_frames_fwd[j])[2])){
-    ship_seq <- translate(getSeq(genome_seq, multiple_frames_fwd[j]))
+    ship_seq <- translate(getSeq(genome_seq, multiple_frames_fwd[j]), if.fuzzy.codon = "X")
     names(ship_seq) <- paste0(seqnames(multiple_frames_fwd[j]), ":", ranges(multiple_frames_fwd[j]), "(", strand(multiple_frames_fwd[j]), ")")
     
   } else{
@@ -115,8 +115,8 @@ for(j in 1:length(multiple_frames_fwd)){
                                      join_overlap_intersect_directed(tblastn_fwd_framed, multiple_frames_fwd[j])[2])
     
     # get sequences, translate and append
-    bow_seq <- suppressWarnings(translate(getSeq(genome_seq, bow)))
-    stern_seq <- translate(getSeq(genome_seq, stern))
+    bow_seq <- suppressWarnings(translate(getSeq(genome_seq, bow)), if.fuzzy.codon = "X")
+    stern_seq <- translate(getSeq(genome_seq, stern), if.fuzzy.codon = "X")
     ship_seq <- AAStringSet(paste0(as.character(bow_seq), as.character(stern_seq)))
     names(ship_seq) <- paste0(seqnames(multiple_frames_fwd[j]), ":", ranges(multiple_frames_fwd[j]), "(", strand(multiple_frames_fwd[j]), ")")
     
@@ -182,7 +182,7 @@ for(j in 1:length(multiple_frames_rev)){
   # first remove those wholly contained within others
   if(width(multiple_frames_rev[j]) == width(join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[1]) ||
      width(multiple_frames_rev[j]) == width(join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[2])){
-    ship_seq <- translate(getSeq(genome_seq, multiple_frames_rev[j]))
+    ship_seq <- translate(getSeq(genome_seq, multiple_frames_rev[j]), if.fuzzy.codon = "X")
     names(ship_seq) <- paste0(seqnames(multiple_frames_rev[j]), ":", ranges(multiple_frames_rev[j]), "(", strand(multiple_frames_rev[j]), ")")
     
   } else{
@@ -195,8 +195,8 @@ for(j in 1:length(multiple_frames_rev)){
                                    join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[1])
     
     # get sequences, translate and append
-    bow_seq <- suppressWarnings(translate(getSeq(genome_seq, bow)))
-    stern_seq <- translate(getSeq(genome_seq, stern))
+    bow_seq <- suppressWarnings(translate(getSeq(genome_seq, bow), if.fuzzy.codon = "X"))
+    stern_seq <- translate(getSeq(genome_seq, stern), if.fuzzy.codon = "X")
     ship_seq <- AAStringSet(paste0(as.character(bow_seq), as.character(stern_seq)))
     names(ship_seq) <- paste0(seqnames(multiple_frames_rev[j]), ":", ranges(multiple_frames_rev[j]), "(", strand(multiple_frames_rev[j]), ")")
     
