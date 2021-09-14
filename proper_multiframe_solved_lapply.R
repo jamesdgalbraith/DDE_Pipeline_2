@@ -7,11 +7,11 @@ suppressPackageStartupMessages({
 
 # parse input variables
 option_list = list(
-  make_option(c("-s", "--species_name"), type="character", default=NULL, 
+  make_option(c("-s", "--species_name"), type="character", default=NULL,
               help="species name", metavar="character"),
-  make_option(c("-o", "--out"), type="character", default="out/plain_tblastn_initial_fastas/", 
+  make_option(c("-o", "--out"), type="character", default="out/plain_tblastn_initial_fastas/",
               help="path to output [default= %default]", metavar="character")
-  
+
 )
 
 opt_parser = OptionParser(option_list=option_list)
@@ -28,6 +28,7 @@ if (is.na(opt$species_name)) {
 
 if (!dir.exists(outdir)){
   dir.create(outdir)
+  
 }
 
 suppressPackageStartupMessages({
@@ -38,8 +39,8 @@ suppressPackageStartupMessages({
 
 # read in blast output
 tblastn_fixed <- read_tsv(paste0("out/tblastn/compiled_in_", species_name, ".out"), show_col_types = F,
-                       col_names = c("qseqid", "seqnames", "pident", "length", "qstart", "qend", "qlen",
-                                     "sstart", "send", "slen", "evalue", "frames")) %>%
+                          col_names = c("qseqid", "seqnames", "pident", "length", "qstart", "qend", "qlen",
+                                        "sstart", "send", "slen", "evalue", "frames")) %>%
   dplyr::filter(length >= 0.5*qlen, length <= 1.2*qlen) %>%
   tidyr::separate(frames, into = c("qframe", "sframe"), sep = "/") %>%
   dplyr::mutate(strand = ifelse(sstart < send, "+", "-"),
@@ -104,36 +105,36 @@ tblastn_fwd_framed <- tblastn_fwd_combined$framed %>% mutate(frame  = tblastn_fw
 
 # loop over, extract frames
 message("forward")
-for(j in 1:length(multiple_frames_fwd)){
-  message(paste0(j, " of ", length(multiple_frames_fwd)))
-  
+multiple_frames_fwd_seq <- lapply(seq_along(multiple_frames_fwd), function(j){
   # first remove those wholly contained within others
-  if(width(multiple_frames_fwd[j]) == width(join_overlap_intersect_directed(tblastn_fwd_framed, multiple_frames_fwd[j])[1]) ||
-     width(multiple_frames_fwd[j]) == width(join_overlap_intersect_directed(tblastn_fwd_framed, multiple_frames_fwd[j])[2])){
-    ship_seq <- translate(getSeq(genome_seq, multiple_frames_fwd[j]), if.fuzzy.codon = "X")
-    names(ship_seq) <- paste0(seqnames(multiple_frames_fwd[j]), ":", ranges(multiple_frames_fwd[j]), "(", strand(multiple_frames_fwd[j]), ")")
+  x <- multiple_frames_fwd[j]
+  message(j)
+  
+  if(width(x) == width(join_overlap_intersect_directed(tblastn_fwd_framed, x)[1]) ||
+     width(x) == width(join_overlap_intersect_directed(tblastn_fwd_framed, x)[2])){
+    tmp <- translate(getSeq(genome_seq, x), if.fuzzy.codon = "X")
+    names(tmp) <- paste0(seqnames(x), ":", ranges(x), "(", strand(x), ")")
     
   } else{
     
     # identify rear portion
-    stern <- join_overlap_intersect_directed(tblastn_fwd_framed, multiple_frames_fwd[j])[2]
+    stern <- join_overlap_intersect_directed(tblastn_fwd_framed, x)[2]
     
     #identify front portion and trim off (subtract) rear portion
-    bow <- setdiff_ranges_directed(join_overlap_intersect_directed(tblastn_fwd_framed, multiple_frames_fwd[j])[1],
-                                     join_overlap_intersect_directed(tblastn_fwd_framed, multiple_frames_fwd[j])[2])
+    bow <- setdiff_ranges_directed(join_overlap_intersect_directed(tblastn_fwd_framed, x)[1],
+                                   join_overlap_intersect_directed(tblastn_fwd_framed, x)[2])
     
     # get sequences, translate and append
     bow_seq <- suppressWarnings(translate(getSeq(genome_seq, bow), if.fuzzy.codon = "X"))
     stern_seq <- translate(getSeq(genome_seq, stern), if.fuzzy.codon = "X")
-    ship_seq <- AAStringSet(paste0(as.character(bow_seq), as.character(stern_seq)))
-    names(ship_seq) <- paste0(seqnames(multiple_frames_fwd[j]), ":", ranges(multiple_frames_fwd[j]), "(", strand(multiple_frames_fwd[j]), ")")
+    tmp <- AAStringSet(paste0(as.character(bow_seq), as.character(stern_seq)))
+    names(tmp) <- paste0(seqnames(x), ":", ranges(x), "(", strand(multiple_frames_fwd[j]), ")")
     
   }
   
+  tmp
   
-  if(j==1){multiple_frames_fwd_seq <- ship_seq}else{multiple_frames_fwd_seq <- c(multiple_frames_fwd_seq, ship_seq)}
-  
-}
+})
 
 # REVERSE
 # Seperate into individual frames
@@ -176,40 +177,42 @@ tblastn_rev_framed <- tblastn_rev_combined$framed %>% mutate(frame  = tblastn_re
   sort()
 message("reverse")
 # loop over, extract frames
-for(j in 1:length(multiple_frames_rev)){
-  message(paste0(j, " of ", length(multiple_frames_rev)))
+multiple_frames_rev_seq <- lapply(seq_along(multiple_frames_rev), function(j){
+  # first remove those wholly contained within others
+  x <- multiple_frames_rev[j]
+  message(j)
   
   # first remove those wholly contained within others
-  if(width(multiple_frames_rev[j]) == width(join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[1]) ||
-     width(multiple_frames_rev[j]) == width(join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[2])){
-    ship_seq <- translate(getSeq(genome_seq, multiple_frames_rev[j]), if.fuzzy.codon = "X")
-    names(ship_seq) <- paste0(seqnames(multiple_frames_rev[j]), ":", ranges(multiple_frames_rev[j]), "(", strand(multiple_frames_rev[j]), ")")
+  if(width(x) == width(join_overlap_intersect_directed(tblastn_rev_framed, x)[1]) ||
+     width(x) == width(join_overlap_intersect_directed(tblastn_rev_framed, x)[2])){
+    tmp <- translate(getSeq(genome_seq, x), if.fuzzy.codon = "X")
+    names(tmp) <- paste0(seqnames(x), ":", ranges(x), "(", strand(x), ")")
     
   } else{
     
     # identify rear portion
-    stern <- join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[1]
+    stern <- join_overlap_intersect_directed(tblastn_rev_framed, x)[1]
     
     #identify front portion and trim off (subtract) rear portion
-    bow <- setdiff_ranges_directed(join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[2],
-                                   join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[1])
+    bow <- setdiff_ranges_directed(join_overlap_intersect_directed(tblastn_rev_framed, x)[2],
+                                   join_overlap_intersect_directed(tblastn_rev_framed, x)[1])
     
     # get sequences, translate and append
     bow_seq <- suppressWarnings(translate(getSeq(genome_seq, bow), if.fuzzy.codon = "X"))
     stern_seq <- translate(getSeq(genome_seq, stern), if.fuzzy.codon = "X")
-    ship_seq <- AAStringSet(paste0(as.character(bow_seq), as.character(stern_seq)))
-    names(ship_seq) <- paste0(seqnames(multiple_frames_rev[j]), ":", ranges(multiple_frames_rev[j]), "(", strand(multiple_frames_rev[j]), ")")
+    tmp <- AAStringSet(paste0(as.character(bow_seq), as.character(stern_seq)))
+    names(tmp) <- paste0(seqnames(x), ":", ranges(x), "(", strand(x), ")")
     
   }
   
   
-  if(j==1){multiple_frames_rev_seq <- ship_seq}else{multiple_frames_rev_seq <- c(multiple_frames_rev_seq, ship_seq)}
+  tmp
   
-}
+})
 
 # ALL
 # Compile together
-both_seq <- c(single_frames_fwd_seq, multiple_frames_fwd_seq, single_frames_rev_seq, multiple_frames_rev_seq)
+both_seq <- c(single_frames_fwd_seq, do.call(c, multiple_frames_fwd_seq), single_frames_rev_seq, do.call(c, multiple_frames_rev_seq))
 
 # Write to file
 writeXStringSet(both_seq, filepath = paste0(outdir, "", species_name, "_seq.fasta"))
