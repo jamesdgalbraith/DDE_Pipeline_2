@@ -40,7 +40,9 @@ suppressPackageStartupMessages({
   library(future.apply)
 })
 
-plan(multicore)
+options(future.globals.maxSize = 8000 * 1024^2)
+
+plan(multicore, workers = 32)
 
 # read in blast output
 tblastn_fixed <- read_tsv(paste0("out/tblastn/compiled_in_", species_name, ".out"), show_col_types = F,
