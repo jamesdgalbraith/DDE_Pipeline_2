@@ -25,7 +25,6 @@ if (is.na(opt$species_name)) {
 } else {
   # set species names
   species_name <- opt$species_name
-  message(species_name)
 }
 
 if (!dir.exists(outdir)){
@@ -105,10 +104,8 @@ tblastn_fwd_framed <- tblastn_fwd_combined$framed %>% mutate(frame  = tblastn_fw
   sort()
 
 # loop over, extract frames
-message("forward")
 for(j in 1:length(multiple_frames_fwd)){
-  message(paste0(j, " of ", length(multiple_frames_fwd)))
-  
+
   # first remove those wholly contained within others
   if(width(multiple_frames_fwd[j]) == width(join_overlap_intersect_directed(tblastn_fwd_framed, multiple_frames_fwd[j])[1]) ||
      width(multiple_frames_fwd[j]) == width(join_overlap_intersect_directed(tblastn_fwd_framed, multiple_frames_fwd[j])[2])){
@@ -176,11 +173,9 @@ multiple_frames_rev <- tibble(joined = names(table(tblastn_rev_combined$joined))
 # extract seperate frames
 tblastn_rev_framed <- tblastn_rev_combined$framed %>% mutate(frame  = tblastn_rev_combined$frame) %>%
   sort()
-message("reverse")
 # loop over, extract frames
 for(j in 1:length(multiple_frames_rev)){
-  message(paste0(j, " of ", length(multiple_frames_rev)))
-  
+
   # first remove those wholly contained within others
   if(width(multiple_frames_rev[j]) == width(join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[1]) ||
      width(multiple_frames_rev[j]) == width(join_overlap_intersect_directed(tblastn_rev_framed, multiple_frames_rev[j])[2])){
@@ -215,5 +210,3 @@ both_seq <- c(single_frames_fwd_seq, multiple_frames_fwd_seq, single_frames_rev_
 
 # Write to file
 writeXStringSet(both_seq, filepath = paste0(outdir, "", species_name, "_seq.fasta"))
-
-message(proc.time() - ptm)

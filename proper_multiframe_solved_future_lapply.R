@@ -12,7 +12,7 @@ option_list = list(
   make_option(c("-s", "--species_name"), type="character", default=NULL,
               help="species name", metavar="character"),
   make_option(c("-t", "--threads"), type="integer", default=as.integer(future::availableCores()),
-              help="species name", metavar="character"),
+              help="number of threads [default=available cores]", metavar="character"),
   make_option(c("-o", "--out"), type="character", default="out/plain_tblastn_initial_fastas/",
               help="path to output [default= %default]", metavar="character")
 
@@ -113,11 +113,9 @@ tblastn_fwd_framed <- tblastn_fwd_combined$framed %>% mutate(frame  = tblastn_fw
   sort()
 
 # loop over, extract frames
-message("forward")
 multiple_frames_fwd_seq <- future_lapply(seq_along(multiple_frames_fwd), function(j){
   # first remove those wholly contained within others
   x <- multiple_frames_fwd[j]
-  message(j)
   
   if(width(x) == width(join_overlap_intersect_directed(tblastn_fwd_framed, x)[1]) ||
      width(x) == width(join_overlap_intersect_directed(tblastn_fwd_framed, x)[2])){
@@ -184,12 +182,10 @@ multiple_frames_rev <- tibble(joined = names(table(tblastn_rev_combined$joined))
 # extract seperate frames
 tblastn_rev_framed <- tblastn_rev_combined$framed %>% mutate(frame  = tblastn_rev_combined$frame) %>%
   sort()
-message("reverse")
 # loop over, extract frames
 multiple_frames_rev_seq <- future_lapply(seq_along(multiple_frames_rev), function(j){
   # first remove those wholly contained within others
   x <- multiple_frames_rev[j]
-  message(j)
   
   # first remove those wholly contained within others
   if(width(x) == width(join_overlap_intersect_directed(tblastn_rev_framed, x)[1]) ||
@@ -225,4 +221,4 @@ both_seq <- c(single_frames_fwd_seq, do.call(c, multiple_frames_fwd_seq), single
 # Write to file
 writeXStringSet(both_seq, filepath = paste0(outdir, "", species_name, "_seq.fasta"))
 
-message(proc.time() - ptm)
+message(paste0(as.double(proc.time() - ptm)[3], " seconds"))
