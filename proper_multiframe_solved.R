@@ -20,7 +20,13 @@ opt = parse_args(opt_parser)
 if (is.na(opt$species_name)) {
   stop("Species name is needed")
 } else {
-  message(opt$species_name)
+  # set species names
+  species_name <- opt$species_name
+  message(species_name)
+}
+
+if (!dir.exists(opt$out)){
+  dir.create(opt$out)
 }
 
 suppressPackageStartupMessages({
@@ -28,9 +34,6 @@ suppressPackageStartupMessages({
   library(plyranges)
   library(tidyverse)
 })
-
-# set species names
-species_name <- opt$species_name
 
 # read in blast output
 tblastn_fixed <- read_tsv(paste0("out/tblastn/compiled_in_", species_name, ".out"), show_col_types = F,
@@ -43,10 +46,6 @@ tblastn_fixed <- read_tsv(paste0("out/tblastn/compiled_in_", species_name, ".out
                 end = ifelse(strand == "+", send, sstart),
                 qframe = as.integer(qframe), sframe = as.integer(sframe))
 
-# read in genome
-genome_seq <- readDNAStringSet(paste0("seq/", species_name, ".fasta"))
-names(genome_seq) <- gsub(" .*", "", names(genome_seq))
-
 # Split into separate into each frame
 tblastn_fwd <- tblastn_fixed %>%
   dplyr::filter(strand == "+") %>%
@@ -57,6 +56,10 @@ tblastn_rev <- tblastn_fixed %>%
 
 tblastn_fixed <- NULL
 gc()
+
+# read in genome
+genome_seq <- readDNAStringSet(paste0("seq/", species_name, ".fasta"))
+names(genome_seq) <- gsub(" .*", "", names(genome_seq))
 
 # FORWARD
 # Seperate into individual frames
