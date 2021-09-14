@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+ptm <- proc.time()
+
 suppressPackageStartupMessages({
   library(optparse)
 })
@@ -216,3 +218,5 @@ both_seq <- c(single_frames_fwd_seq, do.call(c, multiple_frames_fwd_seq), single
 
 # Write to file
 writeXStringSet(both_seq, filepath = paste0(outdir, "", species_name, "_seq.fasta"))
+
+message(proc.time() - ptm)
