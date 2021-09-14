@@ -11,6 +11,8 @@ suppressPackageStartupMessages({
 option_list = list(
   make_option(c("-s", "--species_name"), type="character", default=NULL,
               help="species name", metavar="character"),
+  make_option(c("-t", "--threads"), type="integer", default=as.integer(future::availableCores()),
+              help="species name", metavar="character"),
   make_option(c("-o", "--out"), type="character", default="out/plain_tblastn_initial_fastas/",
               help="path to output [default= %default]", metavar="character")
 
