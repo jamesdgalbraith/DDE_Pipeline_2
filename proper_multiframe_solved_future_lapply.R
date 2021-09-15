@@ -27,7 +27,6 @@ if (is.na(opt$species_name)) {
 } else {
   # set species names
   species_name <- opt$species_name
-  message(species_name)
 }
 
 if (!dir.exists(outdir)){

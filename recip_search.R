@@ -8,7 +8,7 @@ suppressPackageStartupMessages({
 # parse input variables
 option_list = list(
   make_option(c("-s", "--species_name"), type="character", default=NULL, 
-              help="species name", metavar="character"),
+              help="species name", metavar="character")
 )
 
 opt_parser = OptionParser(option_list=option_list)
