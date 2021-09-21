@@ -49,7 +49,7 @@ plan(multicore, workers = opt$threads)
 tblastn_fixed <- read_tsv(paste0("out/tblastn/compiled_in_", species_name, ".out"), show_col_types = F,
                           col_names = c("qseqid", "seqnames", "pident", "length", "qstart", "qend", "qlen",
                                         "sstart", "send", "slen", "evalue", "frames")) %>%
-  dplyr::filter(length >= 0.5*qlen, length <= 1.2*qlen) %>%
+  dplyr::filter(length >= 0.5*qlen, length <= 1.2*qlen, pident >=50) %>%
   tidyr::separate(frames, into = c("qframe", "sframe"), sep = "/") %>%
   dplyr::mutate(strand = ifelse(sstart < send, "+", "-"),
                 start = ifelse(strand == "+", sstart, send),
@@ -65,7 +65,7 @@ tblastn_rev <- tblastn_fixed %>%
   plyranges::as_granges()
 
 tblastn_fixed <- NULL
-gc()
+suppressMessages(gc())
 
 # read in genome
 genome_seq <- readDNAStringSet(paste0("seq/", species_name, ".fasta"))
@@ -224,4 +224,4 @@ message(paste0(as.double(proc.time() - ptm)[3], " seconds"))
 
 # Write coordinates of single frames to file
 write_bed(suppressWarnings(c(single_frames_fwd, single_frames_rev)) %>% select(-n),
-          file = paste0(outdir, "", species_name, "_single_frame.bed"), )
+          file = paste0(outdir, "", species_name, "_single_frame.bed"))

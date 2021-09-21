@@ -19,7 +19,6 @@ if (is.na(opt$species_name)) {
 } else {
   # set species names
   species_name <- opt$species_name
-  message(species_name)
 }
 
 suppressPackageStartupMessages({
@@ -43,7 +42,7 @@ recip_blast_filtered <- recip_blast %>%
   dplyr::slice(1) %>%
   ungroup() %>%
   mutate(sseqid = sub("_.*", "", sseqid))  %>%
-  filter(length >= 0.8*slen, length <= 1.2*slen, qlen/slen<=1.25, qlen/slen>=0.75)
+  filter(length >= 0.8*slen, length <= 1.2*slen)
 
 # make tibble to name sequences
 classified_tbl <- tibble(seqnames = names(both_seq)) %>%
