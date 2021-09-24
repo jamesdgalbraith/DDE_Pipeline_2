@@ -19,7 +19,12 @@ rm out/split_out/*_in_${GENOME}.out
 
 # piece together 
 echo "Getting sequences"
-Rscript proper_multiframe_solved_lapply.R -s ${GENOME}
+if [ -z "$SPECIES" ]
+then
+    Rscript Rscript proper_multiframe_solved_lapply.R -g ${GENOME}
+else
+    Rscript proper_multiframe_solved_lapply.R -g ${GENOME} -s ${SPECIES}
+fi
 
 # replace stop codons with ambigious
 sed -i 's/\*/X/g' out/plain_tblastn_initial_fastas/${GENOME}_seq.fasta
@@ -33,6 +38,18 @@ blastp -num_threads ${THREADS} -query out/plain_tblastn_initial_fastas/${GENOME}
 
 # classify repeats
 echo "Final classification"
-Rscript recip_search.R -s ${GENOME}
+if [ -z "$SPECIES" ]
+then
+    Rscript recip_search.R -g ${GENOME}
+else
+    Rscript recip_search.R -g ${GENOME} -s ${SPECIES}
+fi
 
+# find orfs
+if [ -z "$SPECIES" ]
+then
+    Rscript orf_finder.R -g ${GENOME}
+else
+    Rscript orf_finder.R -g ${GENOME} -s ${SPECIES}
+fi
 echo "Complete"

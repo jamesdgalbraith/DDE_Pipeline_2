@@ -9,8 +9,8 @@ suppressPackageStartupMessages({
 
 # parse input variables
 option_list = list(
-  make_option(c("-s", "--species_name"), type="character", default=NULL, 
-              help="species name", metavar="character"),
+  make_option(c("-g", "--genome_name"), type="character", default=NULL, 
+              help="genome name", metavar="character"),
   make_option(c("-o", "--out"), type="character", default="out/plain_tblastn_initial_fastas/", 
               help="path to output [default= %default]", metavar="character")
   
@@ -20,15 +20,21 @@ opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
 outdir <- opt$out
 
-if (is.na(opt$species_name)) {
-  stop("Species name is needed")
+if (is.na(opt$genome_name)) {
+  stop("Genome name is needed")
 } else {
-  # set species names
-  species_name <- opt$species_name
+  # set genome names
+  genome_name <- opt$genome_name
 }
 
 if (!dir.exists(outdir)){
   dir.create(outdir)
+}
+
+if (is.na(opt$species_name)) {
+  species_name <- opt$genome_name
+} else {
+  species_name <- opt$species_name
 }
 
 suppressPackageStartupMessages({
@@ -38,7 +44,7 @@ suppressPackageStartupMessages({
 })
 
 # read in blast output
-tblastn_fixed <- read_tsv(paste0("out/tblastn/compiled_in_", species_name, ".out"), show_col_types = F,
+tblastn_fixed <- read_tsv(paste0("out/tblastn/compiled_in_", genome_name, ".out"), show_col_types = F,
                        col_names = c("qseqid", "seqnames", "pident", "length", "qstart", "qend", "qlen",
                                      "sstart", "send", "slen", "evalue", "frames")) %>%
   dplyr::filter(length >= 0.5*qlen, length <= 1.2*qlen, pident >=50) %>%
@@ -60,7 +66,7 @@ tblastn_fixed <- NULL
 suppressMessages(gc())
 
 # read in genome
-genome_seq <- readDNAStringSet(paste0("seq/", species_name, ".fasta"))
+genome_seq <- readDNAStringSet(paste0("seq/", genome_name, ".fasta"))
 names(genome_seq) <- gsub(" .*", "", names(genome_seq))
 
 # FORWARD
