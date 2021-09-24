@@ -38,6 +38,7 @@ suppressPackageStartupMessages({
   library(BSgenome)
   library(plyranges)
   library(tidyverse)
+  library(ORFik)
 })
 
 if(!file.exists(paste0(outdir, "/", genome_name, "_single_frame.bed"))){
@@ -49,14 +50,14 @@ genome_seq <- readDNAStringSet(paste0("seq/", genome_name, ".fasta"))
 names(genome_seq) <- sub(" .*", "", names(genome_seq))
 
 # read in bed as tibble (+1 to correct start)
-single_frame_bed <- read_tsv(paste0("out/plain_tblastn_initial_fastas/", genome_name, "_single_frame.bed"),
+single_frame_bed <- read_tsv(paste0("out/plain_tblastn_initial_fastas/", species_name, "_single_frame.bed"),
                              col_names = c("seqnames", "start", "end", "name", "score", "strand")) %>%
   mutate(start = start + 1, name = paste0(seqnames, ":", start, "-", end, "(", strand, ")"),
          frame = case_when(start%%3 == 1 ~ 1, start%%3 == 2 ~ 2, start%%3 == 0 ~ 3)) %>%
   inner_join(tibble(seqnames = names(genome_seq), contig_width = width(genome_seq)))
 
 # read in classification of all, join to keep only singlke frames
-single_frame_classified <- tibble(name = names(readAAStringSet(paste0("out/classified_tnps/", genome_name, "_compiled.fasta")))) %>%
+single_frame_classified <- tibble(name = names(readAAStringSet(paste0("out/classified_tnps/", species_name, "_compiled.fasta")))) %>%
   separate(name, into = c("name", "class"), sep = "#") %>%
   inner_join(single_frame_bed) %>%
   mutate(start = start - 450, end = end + 450, width = end - start +1) %>%
