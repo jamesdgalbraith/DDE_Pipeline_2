@@ -20,7 +20,7 @@ opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
 outdir <- opt$out
 
-if (is.na(opt$genome_name)) {
+if (is.null(opt$genome_name)) {
   stop("Genome name is needed")
 } else {
   # set genome names
@@ -31,7 +31,7 @@ if (!dir.exists(outdir)){
   dir.create(outdir)
 }
 
-if (is.na(opt$species_name)) {
+if (is.null(opt$species_name)) {
   species_name <- opt$genome_name
 } else {
   species_name <- opt$species_name
