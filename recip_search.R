@@ -8,6 +8,8 @@ suppressPackageStartupMessages({
 # parse input variables
 option_list = list(
   make_option(c("-g", "--genome_name"), type="character", default=NULL, 
+              help="genome name", metavar="character"),
+  make_option(c("-s", "--species_name"), type="character", default=NULL,
               help="genome name", metavar="character")
 )
 

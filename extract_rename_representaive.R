@@ -17,7 +17,7 @@ for(i in 1:length(families)){
   colnames(sheet1) <- c("clade", "seqnames")
   
   # select representatives
-  sheet1 <- sheet1[!is.null(sheet1$clade),]
+  sheet1 <- sheet1[!is.na(sheet1$clade),]
   
   # Read in family sequence
   alignment <- readAAStringSet(paste0("data/alignments/og/", families[i], ".fasta"))
@@ -30,14 +30,14 @@ for(i in 1:length(families)){
     inner_join(sheet1)
   tibble(names = names(table(sheet1$seqnames)), n = as.integer(table(sheet1$seqnames))) %>% arrange(-n)
   # names sequences accordingly
-  names(alignment) <- paste0(families[i], "_", sub("Clade ", "", names_alignment$clade))
+  names(alignment) <- paste0(families[i], "_", sub("Clade ", "", names_alignment$clade), "#", names(alignment))
   
-  # write unaligned to file
-  writeXStringSet(x = RemoveGaps(alignment),
-                  filepath = paste0("data/unaligned/", families[i], "_representative.fasta"))
+  # # write unaligned to file
+  # writeXStringSet(x = RemoveGaps(alignment),
+  #                 filepath = paste0("data/unaligned/", families[i], "_representative.fasta"))
   
   # Write representative aligned to file
-  writeXStringSet(alignment, paste0("data/alignments//", families[i], ".fasta"))
+  writeXStringSet(alignment, paste0("temp/", families[i], ".fasta"))
 
 }
 
