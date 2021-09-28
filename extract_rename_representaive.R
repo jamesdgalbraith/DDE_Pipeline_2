@@ -17,7 +17,7 @@ for(i in 1:length(families)){
   colnames(sheet1) <- c("clade", "seqnames")
   
   # select representatives
-  sheet1 <- sheet1[!is.na(sheet1$clade),]
+  sheet1 <- sheet1[!is.null(sheet1$clade),]
   
   # Read in family sequence
   alignment <- readAAStringSet(paste0("data/alignments/og/", families[i], ".fasta"))

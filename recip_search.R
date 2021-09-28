@@ -14,14 +14,14 @@ option_list = list(
 opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
 
-if (is.na(opt$genome_name)) {
+if (is.null(opt$genome_name)) {
   stop("Genome name is needed")
 } else {
   # set genome names
   genome_name <- opt$genome_name
 }
 
-if (is.na(opt$species_name)) {
+if (is.null(opt$species_name)) {
   species_name <- opt$genome_name
 } else {
   species_name <- opt$species_name
