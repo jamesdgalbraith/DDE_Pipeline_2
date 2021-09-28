@@ -21,9 +21,9 @@ rm out/split_out/*_in_${GENOME}.out
 echo "Getting sequences"
 if [ -z "$SPECIES" ]
 then
-    Rscript proper_multiframe_solved_future_lapply.R -g ${GENOME}
+    Rscript proper_multiframe_solved_future_lapply.R -g ${GENOME} -t ${THREADS}
 else
-    Rscript proper_multiframe_solved_future_lapply.R -g ${GENOME} -s ${SPECIES}
+    Rscript proper_multiframe_solved_future_lapply.R -g ${GENOME} -s ${SPECIES} -t ${THREADS}
 fi
 
 # replace stop codons with ambigious
