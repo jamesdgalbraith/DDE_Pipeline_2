@@ -21,9 +21,9 @@ rm out/split_out/*_in_${GENOME}.out
 echo "Getting sequences"
 if [ -z "$SPECIES" ]
 then
-    Rscript proper_multiframe_solved_lapply.R -g ${GENOME}
+    Rscript proper_multiframe_solved_future_lapply.R -g ${GENOME}
 else
-    Rscript proper_multiframe_solved_lapply.R -g ${GENOME} -s ${SPECIES}
+    Rscript proper_multiframe_solved_future_lapply.R -g ${GENOME} -s ${SPECIES}
 fi
 
 # replace stop codons with ambigious
@@ -45,11 +45,11 @@ else
     Rscript recip_search.R -g ${GENOME} -s ${SPECIES}
 fi
 
-# find orfs
-if [ -z "$SPECIES" ]
-then
-    Rscript orf_finder.R -g ${GENOME}
-else
-    Rscript orf_finder.R -g ${GENOME} -s ${SPECIES}
-fi
-echo "Complete"
+# # find orfs
+# if [ -z "$SPECIES" ]
+# then
+#     Rscript orf_finder.R -g ${GENOME}
+# else
+#     Rscript orf_finder.R -g ${GENOME} -s ${SPECIES}
+# fi
+# echo "Complete"
