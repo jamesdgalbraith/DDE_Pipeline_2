@@ -21,7 +21,7 @@ rm out/split_out/*_in_${GENOME}.out
 echo "Getting sequences"
 if [ -z "$SPECIES" ]
 then
-    Rscript Rscript proper_multiframe_solved_lapply.R -g ${GENOME}
+    Rscript proper_multiframe_solved_lapply.R -g ${GENOME}
 else
     Rscript proper_multiframe_solved_lapply.R -g ${GENOME} -s ${SPECIES}
 fi
