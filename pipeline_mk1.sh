@@ -3,7 +3,7 @@
 if [ -z "$THREADS" ]
 then
     THREADS=1
-else
+fi
 
 # make directories
 mkdir -p out/split_out/ out/tblastn/
