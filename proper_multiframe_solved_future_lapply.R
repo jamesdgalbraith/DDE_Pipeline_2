@@ -226,10 +226,10 @@ multiple_frames_rev_seq <- future_lapply(seq_along(multiple_frames_rev), functio
 both_seq <- c(single_frames_fwd_seq, do.call(c, multiple_frames_fwd_seq), single_frames_rev_seq, do.call(c, multiple_frames_rev_seq))
 
 # Write to file
-writeXStringSet(both_seq, filepath = paste0(outdir, "", species_name, "_seq.fasta"))
+writeXStringSet(both_seq, filepath = paste0(outdir, "", genome_name, "_seq.fasta"))
 
 message(paste0(as.double(proc.time() - ptm)[3], " seconds"))
 
 # Write coordinates of single frames to file
 write_bed(suppressWarnings(c(single_frames_fwd, single_frames_rev)) %>% select(-n),
-          file = paste0(outdir, "", species_name, "_single_frame.bed"))
+          file = paste0(outdir, "", genome_name, "_single_frame.bed"))

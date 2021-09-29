@@ -215,4 +215,4 @@ for(j in 1:length(multiple_frames_rev)){
 both_seq <- c(single_frames_fwd_seq, multiple_frames_fwd_seq, single_frames_rev_seq, multiple_frames_rev_seq)
 
 # Write to file
-writeXStringSet(both_seq, filepath = paste0(outdir, "", species_name, "_seq.fasta"))
+writeXStringSet(both_seq, filepath = paste0(outdir, "", genome_name, "_seq.fasta"))

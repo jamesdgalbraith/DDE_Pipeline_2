@@ -42,7 +42,7 @@ recip_blast <- read_tsv(paste0("out/recip/", genome_name, ".out"),
 )
 
 # read in sequence
-both_seq <- readAAStringSet(filepath = paste0("out/plain_tblastn_initial_fastas/", species_name, "_seq.fasta"))
+both_seq <- readAAStringSet(filepath = paste0("out/plain_tblastn_initial_fastas/", genome_name, "_seq.fasta"))
 
 # filter based on length
 recip_blast_filtered <- recip_blast %>%
