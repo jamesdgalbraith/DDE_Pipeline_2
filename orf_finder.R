@@ -41,11 +41,11 @@ if(opt$flank_size%%3 != 0){
 }
 
 if(!dir.exists(paste0(outdir, "/aa"))){
-  dir.create(paste0(outdir, "/aa"))
+  dir.create(paste0(outdir, "/aa"), recursive = T)
 }
 
 if(!dir.exists(paste0(outdir, "/nt"))){
-  dir.create(paste0(outdir, "/nt"))
+  dir.create(paste0(outdir, "/nt"), recursive = T)
 }
 
 # genome_name = "latCor_2.0"
