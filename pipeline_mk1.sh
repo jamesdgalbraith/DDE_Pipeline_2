@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -z "$THREADS" ]
+then
+    THREADS=1
+else
+
 # make directories
 mkdir -p out/split_out/ out/tblastn/
 
