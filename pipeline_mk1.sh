@@ -45,17 +45,17 @@ blastp -num_threads ${THREADS} -query out/plain_tblastn_initial_fastas/${GENOME}
 echo "Final classification"
 if [ -z "$SPECIES" ]
 then
-    Rscript recip_search.R -g ${GENOME} -f 450
+    Rscript recip_search.R -g ${GENOME}
 else
-    Rscript recip_search.R -g ${GENOME} -s ${SPECIES} -f 450
+    Rscript recip_search.R -g ${GENOME} -s ${SPECIES}
 fi
 
 # find orfs
 echo "Finding ORFs"
 if [ -z "$SPECIES" ]
 then
-    Rscript orf_finder.R -g ${GENOME}
+    Rscript orf_finder.R -g ${GENOME}  -f 450
 else
-    Rscript orf_finder.R -g ${GENOME} -s ${SPECIES}
+    Rscript orf_finder.R -g ${GENOME} -s ${SPECIES}  -f 450
 fi
 echo "Complete"
