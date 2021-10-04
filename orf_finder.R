@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 suppressPackageStartupMessages({
   library(optparse)
 })
@@ -144,19 +146,3 @@ for(i in 1:length(classes)){
   }
   
 }
-
-# clstr <- read.csv("out/classified_tnps/Tc1marPlm/Laticauda_colubrina_Tc1marPlm_nt_cd-hit-est.fasta.clstr", sep = "\t",
-#          row.names = NULL, header = FALSE, stringsAsFactors = FALSE) %>% as_tibble()
-# 
-# clstr2 <- clstr
-# n = nrow(clstr)
-# x = 0
-# numbers_only <- function(x) !grepl("\\D", x)
-# for (row in c(1:n)) {
-#   if (numbers_only(clstr2[row,1]) == TRUE) {
-#     clstr2[row,1] <- x}
-#   else {NULL}
-#   x <- clstr2[row,1]
-# }
-# 
-# clstr2$V1 <- sub(">", "", clstr2$V1)

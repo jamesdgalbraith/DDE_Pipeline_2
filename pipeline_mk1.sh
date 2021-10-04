@@ -59,3 +59,5 @@ else
     Rscript orf_finder.R -g ${GENOME} -s ${SPECIES}  -f 450
 fi
 echo "Complete"
+
+rm seq/${GENOME}.fasta.n*
