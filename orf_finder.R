@@ -139,7 +139,7 @@ for(i in 1:length(classes)){
   tmp_nt <- single_frame_classified_orfs_nt[single_frame_classified_orf_ranges$class == classes[i]]
   
   if(length(tmp_nt) > 0){
-    names(tmp_nt) <- paste0(names(tmp_nt), "#", classes[i])
+    names(tmp_nt) <- paste0(species_name, "#", names(tmp_nt))
     names(tmp_aa) <- paste0(species_name, "#", sub("#.*", "", names(tmp_aa)))
     writeXStringSet(tmp_aa, paste0("out/orfs/aa/", species_name, "_", classes[i], ".fasta"))
     writeXStringSet(tmp_nt, paste0("out/orfs/nt/", species_name, "_", classes[i], ".fasta"))
