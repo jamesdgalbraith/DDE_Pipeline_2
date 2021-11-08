@@ -29,6 +29,10 @@ for (i in 1:length(families)) {
   longest_clades %>%
     arrange(width)
   
+  selected_seq <- family_seq[names(family_seq) %in% longest_clades$seqnames]
+  
+  names(selected_seq) <- paste0(families[i], "_", 1:length(selected_seq))
+  
   writeXStringSet(family_seq[names(family_seq) %in% longest_clades$seqnames], paste0("data/unaligned/", families[i], "_representative.fasta"))
   
 }
