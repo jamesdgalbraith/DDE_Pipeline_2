@@ -81,9 +81,12 @@ names(genome_seq) <- gsub(" .*", "", names(genome_seq))
 
 # FORWARD
 # Seperate into individual frames
-tblastn_fwd_1 <- GenomicRanges::reduce(tblastn_fwd[tblastn_fwd$sframe == 1]) %>% dplyr::mutate(sframe = 1)
-tblastn_fwd_2 <- GenomicRanges::reduce(tblastn_fwd[tblastn_fwd$sframe == 2]) %>% dplyr::mutate(sframe = 2)
-tblastn_fwd_3 <- GenomicRanges::reduce(tblastn_fwd[tblastn_fwd$sframe == 3]) %>% dplyr::mutate(sframe = 3)
+tblastn_fwd_1 <- GenomicRanges::reduce(tblastn_fwd[tblastn_fwd$sframe == 1])
+if(length(tblastn_fwd_1) > 0){tblastn_fwd_1$sframe <- 1}
+tblastn_fwd_2 <- GenomicRanges::reduce(tblastn_fwd[tblastn_fwd$sframe == 2])
+if(length(tblastn_fwd_2) > 0){tblastn_fwd_2$sframe <- 2}
+tblastn_fwd_3 <- GenomicRanges::reduce(tblastn_fwd[tblastn_fwd$sframe == 3])
+if(length(tblastn_fwd_3) > 0){tblastn_fwd_3$sframe <- 3}
 
 # Reduce/merge (will contain different frames)
 tblastn_fwd_reduced <- GenomicRanges::reduce(tblastn_fwd)
@@ -120,6 +123,7 @@ tblastn_fwd_framed <- tblastn_fwd_combined$framed %>% mutate(frame  = tblastn_fw
   sort()
 
 # loop over, extract frames
+if(length(multiple_frames_fwd) >0){
 multiple_frames_fwd_seq <- future_lapply(seq_along(multiple_frames_fwd), function(j){
   # first remove those wholly contained within others
   x <- multiple_frames_fwd[j]
@@ -150,11 +154,20 @@ multiple_frames_fwd_seq <- future_lapply(seq_along(multiple_frames_fwd), functio
   
 })
 
+multiple_frames_fwd_seq <- do.call(c, multiple_frames_fwd_seq)
+
+} else {
+  multiple_frames_fwd_seq <- NULL
+}
+
 # REVERSE
 # Seperate into individual frames
-tblastn_rev_1 <- GenomicRanges::reduce(tblastn_rev[tblastn_rev$sframe == -1]) %>% dplyr::mutate(sframe = -1)
-tblastn_rev_2 <- GenomicRanges::reduce(tblastn_rev[tblastn_rev$sframe == -2]) %>% dplyr::mutate(sframe = -2)
-tblastn_rev_3 <- GenomicRanges::reduce(tblastn_rev[tblastn_rev$sframe == -3]) %>% dplyr::mutate(sframe = -3)
+tblastn_rev_1 <- GenomicRanges::reduce(tblastn_rev[tblastn_rev$sframe == -1])
+if(length(tblastn_rev_1) > 0){tblastn_rev_1$sframe <- -1}
+tblastn_rev_2 <- GenomicRanges::reduce(tblastn_rev[tblastn_rev$sframe == -2])
+if(length(tblastn_rev_2) > 0){tblastn_rev_2$sframe <- -4}
+tblastn_rev_3 <- GenomicRanges::reduce(tblastn_rev[tblastn_rev$sframe == -3])
+if(length(tblastn_rev_3) > 0){tblastn_rev_3$sframe <- -3}
 
 # Reduce/merge (will contain different frames)
 tblastn_rev_reduced <- GenomicRanges::reduce(tblastn_rev)
@@ -190,6 +203,7 @@ multiple_frames_rev <- tibble(joined = names(table(tblastn_rev_combined$joined))
 tblastn_rev_framed <- tblastn_rev_combined$framed %>% mutate(frame  = tblastn_rev_combined$frame) %>%
   sort()
 # loop over, extract frames
+if(length(multiple_frames_rev) > 0){
 multiple_frames_rev_seq <- future_lapply(seq_along(multiple_frames_rev), function(j){
   # first remove those wholly contained within others
   x <- multiple_frames_rev[j]
@@ -222,8 +236,16 @@ multiple_frames_rev_seq <- future_lapply(seq_along(multiple_frames_rev), functio
   
 })
 
+multiple_frames_rev_seq <- do.call(c, multiple_frames_rev_seq)
+
+} else {
+  
+  multiple_frames_rev_seq <- NULL
+  
+}
+
 # Compile together
-both_seq <- c(single_frames_fwd_seq, do.call(c, multiple_frames_fwd_seq), single_frames_rev_seq, do.call(c, multiple_frames_rev_seq))
+both_seq <- c(single_frames_fwd_seq, multiple_frames_fwd_seq, single_frames_rev_seq, multiple_frames_rev_seq)
 
 # Write to file
 writeXStringSet(both_seq, filepath = paste0(outdir, "", genome_name, "_seq.fasta"))
