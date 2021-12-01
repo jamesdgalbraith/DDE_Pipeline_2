@@ -202,6 +202,7 @@ multiple_frames_rev <- tibble(joined = names(table(tblastn_rev_combined$joined))
 # extract seperate frames
 tblastn_rev_framed <- tblastn_rev_combined$framed %>% mutate(frame  = tblastn_rev_combined$frame) %>%
   sort()
+
 # loop over, extract frames
 if(length(multiple_frames_rev) > 0){
 multiple_frames_rev_seq <- future_lapply(seq_along(multiple_frames_rev), function(j){
@@ -252,6 +253,10 @@ writeXStringSet(both_seq, filepath = paste0(outdir, "", genome_name, "_seq.fasta
 
 message(paste0(as.double(proc.time() - ptm)[3], " seconds"))
 
-# Write coordinates of single frames to file
-write_bed(suppressWarnings(c(single_frames_fwd, single_frames_rev)) %>% select(-n),
-          file = paste0(outdir, "", genome_name, "_single_frame.bed"))
+# write single frame seq to file if present
+if(suppressWarnings(length(c(single_frames_fwd, single_frames_rev))) > 0){
+  
+  write_bed(suppressWarnings(c(single_frames_fwd, single_frames_rev)) %>% select(-n),
+            file = paste0(outdir, "", genome_name, "_single_frame.bed"))
+  
+}
