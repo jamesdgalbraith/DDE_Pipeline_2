@@ -46,6 +46,11 @@ else
     Rscript proper_multiframe_solved_future_lapply.R -g ${GENOME} -s ${SPECIES} -t ${THREADS}
 fi
 
+# end if blast output is empty
+if [ ! -s out/plain_tblastn_initial_fastas/${GENOME}_seq.fasta ];
+    then echo "No DDEs found in ${GENOME} during stitching" && exit 2
+fi
+
 # replace stop codons with ambigious
 sed -i 's/\*/X/g' out/plain_tblastn_initial_fastas/${GENOME}_seq.fasta
 

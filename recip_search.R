@@ -36,9 +36,9 @@ suppressPackageStartupMessages({
 })
 
 # read in recip tblastx
-recip_blast <- read_tsv(paste0("out/recip/", genome_name, ".out"),
+recip_blast <- suppressMessages(read_tsv(paste0("out/recip/", genome_name, ".out"),
                             col_names = c("seqnames", "sseqid", "pident", "length", "qstart", "qend", "qlen",
-                                          "sstart", "send", "slen")
+                                          "sstart", "send", "slen"))
 )
 
 # read in sequence

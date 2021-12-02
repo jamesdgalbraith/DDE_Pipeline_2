@@ -34,8 +34,6 @@ if (is.null(opt$species_name)) {
   species_name <- opt$species_name
 }
 
-message(species_name)
-
 if(opt$flank_size%%3 != 0){
   stop("Size of flanking sequence in nt must be divisible by 3")
 } else {
@@ -49,10 +47,6 @@ if(!dir.exists(paste0(outdir, "/aa"))){
 if(!dir.exists(paste0(outdir, "/nt"))){
   dir.create(paste0(outdir, "/nt"), recursive = T)
 }
-
-# genome_name = "latCor_2.0"
-# species_name = "Laticauda_colubrina"
-# outdir <- "out/orfs/"
 
 suppressPackageStartupMessages({
   library(BSgenome)

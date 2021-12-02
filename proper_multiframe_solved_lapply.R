@@ -73,6 +73,7 @@ genome_seq <- readDNAStringSet(paste0("seq/", genome_name, ".fasta"))
 names(genome_seq) <- gsub(" .*", "", names(genome_seq))
 
 # FORWARD
+if(length(tblastn_fwd) > 0){
 # Seperate into individual frames
 tblastn_fwd_1 <- GenomicRanges::reduce(tblastn_fwd[tblastn_fwd$sframe == 1])
 if(length(tblastn_fwd_1) > 0){tblastn_fwd_1$sframe <- 1}
@@ -152,8 +153,16 @@ multiple_frames_fwd_seq <- do.call(c, multiple_frames_fwd_seq)
 } else {
   multiple_frames_fwd_seq <- NULL
 }
+} else {
+  
+  # if neither single or multiple frames create NULL 
+  single_frames_fwd_seq <- NULL
+  multiple_frames_fwd_seq <- NULL
+  
+}
 
 # REVERSE
+if(length(tblastn_rev) > 0){
 # Seperate into individual frames
 tblastn_rev_1 <- GenomicRanges::reduce(tblastn_rev[tblastn_rev$sframe == -1])
 if(length(tblastn_rev_1) > 0){tblastn_rev_1$sframe <- -1}
@@ -237,9 +246,24 @@ multiple_frames_rev_seq <- do.call(c, multiple_frames_rev_seq)
   multiple_frames_rev_seq <- NULL
   
 }
+} else {
+  
+  # if neither single or multiple frames create NULL 
+  single_frames_rev_seq <- NULL
+  multiple_frames_rev_seq <- NULL
+  
+}
 
 # Compile together
 both_seq <- c(single_frames_fwd_seq, multiple_frames_fwd_seq, single_frames_rev_seq, multiple_frames_rev_seq)
+
+
+# Kill if none were found
+if(length(both_seq) == 0){
+  
+  stop("No DDEs found during stitching")
+  
+}
 
 # Write to file
 writeXStringSet(both_seq, filepath = paste0(outdir, "", genome_name, "_seq.fasta"))
@@ -251,5 +275,8 @@ if(suppressWarnings(length(c(single_frames_fwd, single_frames_rev))) > 0){
   
   write_bed(suppressWarnings(c(single_frames_fwd, single_frames_rev)) %>% select(-n),
             file = paste0(outdir, "", genome_name, "_single_frame.bed"))
+  
+  writeXStringSet(c(single_frames_fwd_seq, single_frames_rev_seq),
+                  filepath = paste0(outdir, "", genome_name, "_single_frame.fasta"))
   
 }

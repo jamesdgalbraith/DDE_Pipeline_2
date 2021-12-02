@@ -17,7 +17,7 @@ if [ ! -s seq/${GENOME}.fasta.gz ];
     then echo "${GENOME} file is missing" && exit 2
 fi
 
-# unzip genom
+# unzip genome
 gunzip < seq/${GENOME}.fasta.gz > seq/${GENOME}.fasta
 
 # piece together 
@@ -27,6 +27,11 @@ then
     Rscript proper_multiframe_solved_future_lapply.R -g ${GENOME} -t ${THREADS}
 else
     Rscript proper_multiframe_solved_future_lapply.R -g ${GENOME} -s ${SPECIES} -t ${THREADS}
+fi
+
+# end if blast output is empty
+if [ ! -s out/plain_tblastn_initial_fastas/${GENOME}_seq.fasta ];
+    then echo "No DDEs found in ${GENOME} during stitching" && exit 2
 fi
 
 # replace stop codons with ambigious
@@ -47,3 +52,5 @@ then
 else
     Rscript recip_search.R -g ${GENOME} -s ${SPECIES}
 fi
+
+rm seq/${GENOME}.fasta
