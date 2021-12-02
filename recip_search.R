@@ -46,12 +46,16 @@ both_seq <- readAAStringSet(filepath = paste0("out/plain_tblastn_initial_fastas/
 
 # filter based on length
 recip_blast_filtered <- recip_blast %>%
-  filter(length >= 0.8*slen, length <= 1.2*slen, evalue <= 1e-25) %>%
+  filter(length >= 0.8*slen, length <= 1.2*slen, evalue <= 1e-25, qlen <= 1.2* slen) %>%
   group_by(seqnames) %>%
   dplyr::slice(1) %>%
   ungroup() %>%
   mutate(sseqid = sub("_.*", "", sseqid))
-  
+
+# end if none good enough
+if(nrow(recip_blast_filtered) == 0){
+  stop("None good enough in reciprocal search")
+}
 
 # make tibble to name sequences
 classified_tbl <- tibble(seqnames = names(both_seq)) %>%
