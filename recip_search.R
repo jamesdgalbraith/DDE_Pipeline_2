@@ -38,7 +38,7 @@ suppressPackageStartupMessages({
 # read in recip tblastx
 recip_blast <- suppressMessages(read_tsv(paste0("out/recip/", genome_name, ".out"),
                             col_names = c("seqnames", "sseqid", "pident", "length", "qstart", "qend", "qlen",
-                                          "sstart", "send", "slen"))
+                                          "sstart", "send", "slen", "evalue"))
 )
 
 # read in sequence
@@ -46,11 +46,12 @@ both_seq <- readAAStringSet(filepath = paste0("out/plain_tblastn_initial_fastas/
 
 # filter based on length
 recip_blast_filtered <- recip_blast %>%
+  filter(length >= 0.8*slen, length <= 1.2*slen, evalue <= 1e-25) %>%
   group_by(seqnames) %>%
   dplyr::slice(1) %>%
   ungroup() %>%
-  mutate(sseqid = sub("_.*", "", sseqid))  %>%
-  filter(length >= 0.8*slen, length <= 1.2*slen)
+  mutate(sseqid = sub("_.*", "", sseqid))
+  
 
 # make tibble to name sequences
 classified_tbl <- tibble(seqnames = names(both_seq)) %>%
