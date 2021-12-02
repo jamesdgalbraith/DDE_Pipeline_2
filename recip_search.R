@@ -58,8 +58,10 @@ if(nrow(recip_blast_filtered) == 0){
 }
 
 # make tibble to name sequences
-classified_tbl <- tibble(seqnames = names(both_seq)) %>%
+suppressMessages(
+  classified_tbl <- tibble(seqnames = names(both_seq)) %>%
   inner_join(recip_blast_filtered)
+  )
 
 # select classified sequences and name
 classified_seq <- both_seq[names(both_seq) %in% classified_tbl$seqnames]

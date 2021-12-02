@@ -54,3 +54,5 @@ else
 fi
 
 rm seq/${GENOME}.fasta
+
+echo ""

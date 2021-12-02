@@ -72,3 +72,5 @@ fi
 
 # remove working seq
 rm seq/${GENOME}*.nhr seq/${GENOME}*.nsq seq/${GENOME}*.nin seq/${GENOME}.fasta
+
+echo ""

@@ -66,7 +66,7 @@ tblastn_rev <- tblastn_fixed %>%
   plyranges::as_granges()
 
 tblastn_fixed <- NULL
-suppressMessages(gc())
+invisible(gc())
 
 # read in genome
 genome_seq <- readDNAStringSet(paste0("seq/", genome_name, ".fasta"))
