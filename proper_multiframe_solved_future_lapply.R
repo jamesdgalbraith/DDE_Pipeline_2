@@ -158,13 +158,13 @@ if(length(tblastn_fwd) > 0){
   multiple_frames_fwd_seq <- do.call(c, multiple_frames_fwd_seq)
   
   } else {
-    multiple_frames_fwd_seq <- NULL
+    multiple_frames_fwd_seq<- AAStringSet()
   }
 } else {
   
   # if neither single or multiple frames create NULL 
-  single_frames_fwd_seq <- NULL
-  multiple_frames_fwd_seq <- NULL
+  single_frames_fwd_seq<- AAStringSet()
+  multiple_frames_fwd_seq<- AAStringSet()
   
 }
 
@@ -250,14 +250,14 @@ multiple_frames_rev_seq <- do.call(c, multiple_frames_rev_seq)
 
 } else {
   
-  multiple_frames_rev_seq <- NULL
+  multiple_frames_rev_seq<- AAStringSet()
   
 }
 } else {
   
   # if neither single or multiple frames create NULL 
-  single_frames_rev_seq <- NULL
-  multiple_frames_rev_seq <- NULL
+  single_frames_rev_seq<- AAStringSet()
+  multiple_frames_rev_seq<- AAStringSet()
   
 }
 
