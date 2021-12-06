@@ -270,6 +270,9 @@ writeXStringSet(both_seq, filepath = paste0(outdir, "", genome_name, "_seq.fasta
 
 message(paste0(as.double(proc.time() - ptm)[3], " seconds"))
 
+if(!exists("single_frames_fwd")){single_frames_fwd <- GRanges(c(seqnames=NULL,ranges=NULL,strand=NULL))}
+if(!exists("single_frames_rev")){single_frames_rev <- GRanges(c(seqnames=NULL,ranges=NULL,strand=NULL))}
+
 # write single frame seq to file if present
 if(suppressWarnings(length(c(single_frames_fwd, single_frames_rev))) > 0){
   
